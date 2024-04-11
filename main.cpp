@@ -1,16 +1,31 @@
+// Write code in here to map Servo behaviours dependant on LDR readings... 
+// Servo at minimum position at full brightness and maximum position at the lowest brightness.
+
 #include "mbed.h"
 #include <cstdint>
 #include <cstring>
 
+#define MID     1500
+#define MIN     1000
+#define MAX     2000
+#define STEP    50
+
 PwmOut servo(PB_3);
 
 // main() runs in its own thread in the OS
-int main()
-{
-    servo.period(0.020);          // servo requires a 20ms period
-    while (1) {
-        for(float offset=0.0; offset<0.001; offset+=0.0001) {
-            servo.pulsewidth(0.001 + offset); // servo position determined by a pulsewidth between 1-2ms
+int main() {
+    
+    servo.period_ms(20);
+    servo.pulsewidth_us(MID); //NB in microseconds
+
+    while(true) {
+        for (int i=MIN;i<=MAX;i+=STEP){
+            servo.pulsewidth_us(i);
             ThisThread::sleep_for(chrono::seconds(1));;
         }
+        for (int i=MAX;i>=MIN;i-=STEP){
+            servo.pulsewidth_us(i);
+            ThisThread::sleep_for(chrono::seconds(1));;
+        }
+    }
 }
