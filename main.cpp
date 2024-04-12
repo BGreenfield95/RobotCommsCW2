@@ -4,14 +4,71 @@
 #include "mbed.h"
 #include <cstdint>
 #include <cstring>
+#include "Zigbee.h"
 
 #define MID     1500
 #define MIN     1000
 #define MAX     2000
 #define STEP    50
 
+#define BUFFSIZE    64
+
+BufferedSerial pc(USBTX,USBRX, 115200);
+Zigbee ZigbeeServo(PA_10, PB_6); 
+
 PwmOut servo(PB_3);
 
+char buffer[BUFFSIZE]   = {0};
+char msgBuff[BUFFSIZE]  = {0};
+char rcvBuff[BUFFSIZE]  = {0};
+int counter             = 0;
+int len                 = 0;
+
+Thread readThread;
+Mutex serialMutex;
+
+void reader()
+{
+    while(1)
+    {
+        if(ZigbeeServo.receiveMessage(rcvBuff))
+        {
+            if(serialMutex.trylock_for(chrono::milliseconds(500)))
+            {
+                len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
+                pc.write(msgBuff, len);
+                serialMutex.unlock();
+            }
+        }
+        ThisThread::sleep_for(chrono::milliseconds(10));
+    }
+}
+
+int main()
+{
+    pc.set_format(
+        /* bits */ 8,
+        /* parity */ BufferedSerial::None,
+        /* stop bit */ 1
+    );
+    readThread.start(reader);
+    
+    if(serialMutex.trylock_for(chrono::milliseconds(500)))
+    {
+        len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
+        pc.write(buffer, len);
+        serialMutex.unlock();
+    }
+
+    while (true) {
+        len = snprintf(msgBuff, BUFFSIZE, "counter %d", counter);
+        ZigbeeServo.sendMessage(msgBuff);
+        counter++;
+        ThisThread::sleep_for(chrono::seconds(10));
+    }
+}
+
+/*
 // main() runs in its own thread in the OS
 int main() {
     
@@ -29,3 +86,4 @@ int main() {
         }
     }
 }
+*/
