@@ -10,8 +10,8 @@ float LDRout;
 #define MAX     1072561119
 #define BUFFSIZE        64
 
-BufferedSerial pc(USBTX,USBRX, 115200);
-Zigbee ZigbeeLDR(PA_10, PB_6); // Zigbee module configured with 115200 baud rate - Change in Zigbee.cpp if required.
+BufferedSerial pcLDR(USBTX,USBRX, 115200);
+Zigbee ZigbeeLDR(PA_2, PA_3); // Zigbee module configured with 115200 baud rate - Change in Zigbee.cpp if required.
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
@@ -31,7 +31,7 @@ void reader()
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
                 len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
-                pc.write(msgBuff, len);
+                pcLDR.write(msgBuff, len);
                 serialMutex.unlock();
             }
         }
@@ -41,7 +41,7 @@ void reader()
 
 int main()
 {
-    pc.set_format(
+    pcLDR.set_format(
         /* bits */ 8,
         /* parity */ BufferedSerial::None,
         /* stop bit */ 1
@@ -51,7 +51,7 @@ int main()
     if(serialMutex.trylock_for(chrono::milliseconds(500)))
     {
         len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
-        pc.write(buffer, len);
+        pcLDR.write(buffer, len);
         serialMutex.unlock();
     }
 
