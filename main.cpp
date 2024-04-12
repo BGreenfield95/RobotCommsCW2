@@ -57,6 +57,7 @@ int main()
 
     while (true) {
         len = snprintf(msgBuff, BUFFSIZE, "LDR: %f", LDR.read());
+        printf("LDR : %f \n", LDR.read());
         ZigbeeLDR.sendMessage(msgBuff);
         counter++;
         ThisThread::sleep_for(chrono::seconds(10));
