@@ -13,10 +13,12 @@
 
 #define BUFFSIZE    64
 
-BufferedSerial pc(USBTX,USBRX, 115200);
+BufferedSerial pcServo(USBTX,USBRX, 115200);
 Zigbee ZigbeeServo(PA_2, PA_3); 
 
 PwmOut servo(PB_3);
+
+
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
@@ -29,6 +31,9 @@ Mutex serialMutex;
 
 void reader()
 {
+    servo.period_ms(20);
+    servo.pulsewidth_us(MID); //NB in microseconds
+    
     while(1)
     {
         if(ZigbeeServo.receiveMessage(rcvBuff))
@@ -36,7 +41,7 @@ void reader()
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
                 len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
-                pc.write(msgBuff, len);
+                pcServo.write(msgBuff, len);
                 serialMutex.unlock();
             }
         }
@@ -46,7 +51,7 @@ void reader()
 
 int main()
 {
-    pc.set_format(
+    pcServo.set_format(
         /* bits */ 8,
         /* parity */ BufferedSerial::None,
         /* stop bit */ 1
@@ -56,7 +61,7 @@ int main()
     if(serialMutex.trylock_for(chrono::milliseconds(500)))
     {
         len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
-        pc.write(buffer, len);
+        pcServo.write(buffer, len);
         serialMutex.unlock();
     }
 
