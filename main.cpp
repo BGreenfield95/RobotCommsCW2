@@ -13,7 +13,7 @@
 
 #define BUFFSIZE    64
 
-BufferedSerial pcServo(USBTX,USBRX, 115200);
+BufferedSerial pcServo(USBTX, USBRX, 115200);
 Zigbee ZigbeeServo(PA_2, PA_3); 
 
 PwmOut servo(PB_3);
