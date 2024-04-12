@@ -10,8 +10,8 @@ float LDRout;
 #define MAX     1072561119
 #define BUFFSIZE        64
 
-BufferedSerial pcLDR(USBTX,USBRX, 115200);
-Zigbee ZigbeeLDR(PA_2, PA_3); // Zigbee module configured with 115200 baud rate - Change in Zigbee.cpp if required.
+BufferedSerial pcLDR(USBTX, USBRX, 115200);
+Zigbee ZigbeeLDR(PA_2, PA_3);
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
@@ -61,7 +61,7 @@ int main()
         ZigbeeLDR.sendMessage(msgBuff);
         counter++;
         ThisThread::sleep_for(chrono::seconds(10));
-        //printf("LDR: %f", LDR.read());
+        printf("LDR: %f", LDR.read());
     }
 }
 /*
