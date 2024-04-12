@@ -40,9 +40,20 @@ void reader()
         {
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
-                len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
-                pcServo.write(msgBuff, len);
-                serialMutex.unlock();
+                if(strcmp(rcvBuff, "0") == 0){
+                    servo.pulsewidth_us(MIN);
+                    len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
+                    pcServo.write(msgBuff, len);
+                    serialMutex.unlock();
+                }
+
+                if(strcmp(rcvBuff, "1") == 0){
+                    servo.pulsewidth_us(MAX);
+                    len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
+                    pcServo.write(msgBuff, len);
+                    serialMutex.unlock();
+                }
+
             }
         }
         ThisThread::sleep_for(chrono::milliseconds(10));
