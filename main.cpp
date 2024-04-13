@@ -31,8 +31,10 @@ void reader()
 {
     while(1)
     {
+//        printf("0");
         if(ZigbeeServo.receiveMessage(rcvBuff))
         {
+            printf("1");
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
                 printf("Received");
