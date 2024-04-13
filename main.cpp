@@ -61,11 +61,12 @@ int main()
 
     while (true) {
         LDRout = LDR.read();
-        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
-//        printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN) * 100);
+//        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
+        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", (LDR.read_u16() - MIN) / (MAX - MIN));
+        printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN));
 //        printf("LDR: %d \n", LDR.read_u16());
 
-        printf("Name: ZigbeeLDR, LDR: %d\n", LDR.read_u16());
+        //printf("Name: ZigbeeLDR, LDR: %d\n", LDR.read_u16());
         //printf("LDR: %d \n", LDR.read());
         ZigbeeLDR.sendMessage(msgBuff);
         counter++;
