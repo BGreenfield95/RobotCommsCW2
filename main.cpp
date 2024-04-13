@@ -42,6 +42,7 @@ void reader()
             {
                 if(strcmp(rcvBuff, "0") == 0){
                     servo.pulsewidth_us(MIN);
+                    printf("Name: ZigbeeServo\r\n");
                     len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
                     pcServo.write(msgBuff, len);
                     serialMutex.unlock();
