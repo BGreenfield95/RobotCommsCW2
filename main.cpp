@@ -36,10 +36,15 @@ void reader()
     
     while(1)
     {
+        printf("1");
         if(ZigbeeServo.receiveMessage(rcvBuff))
         {
+            printf("2");
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
+                printf("ZibbeeServo");
+                printf("ZigbeeServo, received: %s", rcvBuff);
+
                 if(strcmp(rcvBuff, "0") == 0){
                     servo.pulsewidth_us(MIN);
                     printf("Name: ZigbeeServo\r\n");
@@ -69,20 +74,7 @@ int main()
         /* stop bit */ 1
     );
     readThread.start(reader);
-    
-    if(serialMutex.trylock_for(chrono::milliseconds(500)))
-    {
-        len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
-        pcServo.write(buffer, len);
-        serialMutex.unlock();
-    }
 
-    while (true) {
-        len = snprintf(msgBuff, BUFFSIZE, "counter %d", counter);
-        ZigbeeServo.sendMessage(msgBuff);
-        counter++;
-        ThisThread::sleep_for(chrono::seconds(10));
-    }
 }
 
 /*
