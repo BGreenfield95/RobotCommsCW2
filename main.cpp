@@ -4,20 +4,23 @@
 #include "Zigbee.h"
 
 AnalogIn LDR(PA_1);
-float LDRout;
+int LDRout;
 
-#define MIN     1071517153
-#define MAX     1072561119
+//#define MIN     1071677704
+//#define MAX     1072535513
 #define BUFFSIZE        64
 
 BufferedSerial pcLDR(USBTX, USBRX, 115200);
-Zigbee ZigbeeLDR(PA_2, PA_3);
+Zigbee ZigbeeLDR(PA_9, PA_10);
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
 char rcvBuff[BUFFSIZE]  = {0};
 int counter             = 0;
 int len                 = 0;
+
+int MAX = 1072535513;
+int MIN = 1071677704;
 
 Thread readThread;
 Mutex serialMutex;
@@ -35,9 +38,10 @@ void reader()
                 serialMutex.unlock();
             }
         }
-        ThisThread::sleep_for(chrono::milliseconds(10));
+        ThisThread::sleep_for(chrono::milliseconds(5));
     }
 }
+
 
 int main()
 {
@@ -56,12 +60,14 @@ int main()
     }
 
     while (true) {
-        len = snprintf(msgBuff, BUFFSIZE, "LDR: %f", LDR.read());
-        printf("LDR : %f \n", LDR.read());
+        LDRout = LDR.read();
+        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
+        printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN) * 100);
+        printf("Name: ZigbeeLDR");
+        //printf("LDR: %d \n", LDR.read());
         ZigbeeLDR.sendMessage(msgBuff);
         counter++;
-        ThisThread::sleep_for(chrono::seconds(10));
-        printf("LDR: %f", LDR.read());
+        ThisThread::sleep_for(chrono::seconds(1));
     }
 }
 /*
