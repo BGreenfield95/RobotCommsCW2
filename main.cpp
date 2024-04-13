@@ -19,8 +19,8 @@ char rcvBuff[BUFFSIZE]  = {0};
 int counter             = 0;
 int len                 = 0;
 
-int MAX = 1072535513;
-int MIN = 1071677704;
+int MAX = 59502;
+int MIN = 8540;
 
 Thread readThread;
 Mutex serialMutex;
@@ -62,8 +62,10 @@ int main()
     while (true) {
         LDRout = LDR.read();
         len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
-        printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN) * 100);
-        printf("Name: ZigbeeLDR");
+//        printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN) * 100);
+//        printf("LDR: %d \n", LDR.read_u16());
+
+        printf("Name: ZigbeeLDR, LDR: %d\n", LDR.read_u16());
         //printf("LDR: %d \n", LDR.read());
         ZigbeeLDR.sendMessage(msgBuff);
         counter++;
