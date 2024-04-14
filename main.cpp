@@ -8,14 +8,15 @@ BufferedSerial pc(USBTX, USBRX, 115200);
 Zigbee xbee(PA_9, PA_10);
 
 AnalogIn LDR(PA_1);
+int LDRin;
 int LDRout;
 
 //#define MIN     1071677704
 //#define MAX     1072535513
 #define BUFFSIZE        64
 
-int MAX = 59502;
-int MIN = 8540;
+int MAX = 58300;
+int MIN = 9000;
 
 Thread readThread;
 Mutex serialMutex;
@@ -61,6 +62,7 @@ int main()
     }
 
     while (true) {
+
         len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", LDR.read_u16());
         pc.write(msgBuff, len);
         xbee.sendMessage(msgBuff);
