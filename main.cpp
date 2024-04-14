@@ -73,7 +73,9 @@ int main()
         len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
         pcServo.write(buffer, len);
         serialMutex.unlock();
-    }
+    } 
+    ThisThread::sleep_for(chrono::seconds(10));
+
 }
 
 /*
