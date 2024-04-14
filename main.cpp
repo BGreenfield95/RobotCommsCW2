@@ -1,7 +1,11 @@
 #include "mbed.h"
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 #include "Zigbee.h"
+
+BufferedSerial pc(USBTX, USBRX, 115200);
+BufferedSerial xbee(PA_9, PA_10);
 
 AnalogIn LDR(PA_1);
 int LDRout;
@@ -10,84 +14,130 @@ int LDRout;
 //#define MAX     1072535513
 #define BUFFSIZE        64
 
-BufferedSerial pcLDR(USBTX, USBRX, 115200);
-Zigbee ZigbeeLDR(PA_9, PA_10);
-
-char buffer[BUFFSIZE]   = {0};
-char msgBuff[BUFFSIZE]  = {0};
-char rcvBuff[BUFFSIZE]  = {0};
-int counter             = 0;
-int len                 = 0;
-
 int MAX = 59502;
 int MIN = 8540;
 
 Thread readThread;
 Mutex serialMutex;
+char msgBuff[BUFFSIZE]  = {0};
+char xbeeBuff[BUFFSIZE] = {0};
+
+char CompMsg[]          = {0x7E, 0x00, 0x0F, 0x10, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0x00, 0x00, 0xA1, 0x58};
+char ChksmPreamble[]    = {0x10, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0x00, 0x00};
+
+char buf[BUFFSIZE]      = {0};
+char buffer[BUFFSIZE]   = {0};
+int length;
+int checksum;
+
+int counter;
 
 void reader()
 {
     while(1)
     {
-        if(ZigbeeLDR.receiveMessage(rcvBuff))
-        {
-            if(serialMutex.trylock_for(chrono::milliseconds(500)))
-            {
-                len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
-                pcLDR.write(msgBuff, len);
-                serialMutex.unlock();
-            }
+        if (uint32_t num = xbee.read(buf, sizeof(buf))) {
+            
+            length = snprintf(buffer, BUFFSIZE, "\r\nThis is the message: %s", buf);
+            pc.write(buf, num);
         }
-        ThisThread::sleep_for(chrono::milliseconds(10));
     }
 }
 
+void BuildMessage(char *xbeeMsg, char *msg, int len)
+{
+    char startByte[]        = {0x7E};
+    char msgLen[]           = {0x00, 0x0E};
+    char type[]             = {0x10};
+    char frameID[]          = {0x01};
+    char destAddr[]         = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    char destAdd2[]         = {0xFF, 0xFE};
+    char broadcastRad[]     = {0x00};
+    char options[]          = {0x00};
 
+    int templen = 0;
+    int finalLen = 17+len;
+    int temp = 0;
+    char temp2[1] = {0};
+    char _xbeeMsg[BUFFSIZE] = {0};
+    
+    //Calculate checksum
+    for(int i=0;i<msgLen[1];i++)
+    {
+        temp += ChksmPreamble[i];
+    }
+    for(int i=0;i<len;i++)
+    {
+        temp += msg[i];
+    }
+    msgLen[1] += len;
+    temp2[0] = (0xFF-temp) & 0xFF;
+
+    finalLen = msgLen[1]+4;                                                     //Calculate full message length
+
+    length = snprintf(buffer, BUFFSIZE, "\r\nchecksum = %#x\r\n", temp2[0]);    //Prepare print out the Checksum to verify
+    pc.write(buffer, length);                                                   //Write the checksum to USB UART
+
+    //Prepare full Xbee message frame
+    char _xbeeMsg2[finalLen];
+    _xbeeMsg2[0] = startByte[0];
+    _xbeeMsg2[1] = msgLen[0];
+    _xbeeMsg2[2] = msgLen[1];
+    _xbeeMsg2[3] = type[0];
+    _xbeeMsg2[4] = frameID[0];
+    _xbeeMsg2[5] = destAddr[0];
+    _xbeeMsg2[6] = destAddr[1];
+    _xbeeMsg2[7] = destAddr[2];
+    _xbeeMsg2[8] = destAddr[3];
+    _xbeeMsg2[9] = destAddr[4];
+    _xbeeMsg2[10] = destAddr[5];
+    _xbeeMsg2[11] = destAddr[6];
+    _xbeeMsg2[12] = destAddr[7];
+    _xbeeMsg2[13] = destAdd2[0];
+    _xbeeMsg2[14] = destAdd2[1];
+    _xbeeMsg2[15] = broadcastRad[0];
+    _xbeeMsg2[16] = options[0];
+    for(int i=0;i<len;i++)
+    {
+        _xbeeMsg2[i+17] = msg[i];
+    }
+    _xbeeMsg2[finalLen-1] = temp2[0];
+
+    xbee.write(_xbeeMsg2, finalLen);                                //Send to xbee
+    
+
+    length = snprintf(buffer, BUFFSIZE, "Hex: ");
+    pc.write(buffer, length);
+    for(int i=0;i<finalLen;i++)
+    {
+        length = snprintf(buffer, BUFFSIZE, "%#x,", _xbeeMsg2[i]);
+        pc.write(buffer, length);
+    }
+}
+
+// main() runs in its own thread in the OS
 int main()
 {
-    pcLDR.set_format(
+
+    pc.set_format(
+        /* bits */ 8,
+        /* parity */ BufferedSerial::None,
+        /* stop bit */ 1
+    );
+    xbee.set_format(
         /* bits */ 8,
         /* parity */ BufferedSerial::None,
         /* stop bit */ 1
     );
     readThread.start(reader);
-    
-    if(serialMutex.trylock_for(chrono::milliseconds(500)))
-    {
-        len = snprintf(buffer, BUFFSIZE, "\r\nHello, I have started :)\r\n");
-        pcLDR.write(buffer, len);
-        serialMutex.unlock();
-    }
+    int n;
+    n = snprintf(msgBuff, BUFFSIZE, "Hello, I have started :)");
+    BuildMessage(xbeeBuff, msgBuff, n);
 
     while (true) {
-        LDRout = LDR.read();
-//        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
-        len = snprintf(msgBuff, BUFFSIZE, "%d", (LDR.read_u16() - MIN) / (MAX - MIN));
-//      printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN));
-//        printf("MSGBuff: %s\n", msgBuff);
-//        printf("LDR: %d \n", LDR.read_u16());
-
-        //printf("Name: ZigbeeLDR, LDR: %d\n", LDR.read_u16());
-        //printf("LDR: %d \n", LDR.read());
-        ZigbeeLDR.sendMessage(msgBuff);
-        ThisThread::sleep_for(chrono::seconds(10));
+        n = snprintf(msgBuff, BUFFSIZE, "%d", LDR.read_u16());
+        BuildMessage(xbeeBuff, msgBuff, n);
+        counter++;
+        ThisThread::sleep_for(chrono::seconds(2));
     }
 }
-/*
-// main() runs in its own thread in the OS
-int main()
-{
-    while (true) {
-        //LDRout = (MAX - LDR.read()) * 100 / (MAX - MIN);
-        printf("LDR Raw = %d\n", LDR.read());
-        LDRout = LDR.read();
-        printf("LDR = %d\n", LDRout);
-        ThisThread::sleep_for(chrono::seconds(3));;
-
-    }
-}
-*/
-//Test One
-//LDR Value = 1072561119 - TORCH
-
-//LDR Value = 1071517153 - BLOCKED
