@@ -64,7 +64,7 @@ int main()
 //        len = snprintf(msgBuff, BUFFSIZE, "LDR: %d\n", LDR.read_u16());
         len = snprintf(msgBuff, BUFFSIZE, "%d", (LDR.read_u16() - MIN) / (MAX - MIN));
 //      printf("LDR: %d \n", (LDR.read_u16() - MIN) / (MAX - MIN));
-        printf("MSGBuff: %s\n", msgBuff);
+//        printf("MSGBuff: %s\n", msgBuff);
 //        printf("LDR: %d \n", LDR.read_u16());
 
         //printf("Name: ZigbeeLDR, LDR: %d\n", LDR.read_u16());
