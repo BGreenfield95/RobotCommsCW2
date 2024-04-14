@@ -61,7 +61,7 @@ int main()
     }
 
     while (true) {
-        len = snprintf(msgBuff, BUFFSIZE, "%d\n", LDR.read_u16());
+        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", LDR.read_u16());
         pc.write(msgBuff, len);
         xbee.sendMessage(msgBuff);
         counter++;
