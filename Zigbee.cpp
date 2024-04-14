@@ -78,6 +78,7 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
                     idx = 0;
                     rxBuffer[idx++] = byte;
                     state = ReadingFrame;
+
                 }
                 break;
 
@@ -86,6 +87,7 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
                 if (idx == 3) {
                     frameLength = (rxBuffer[1] << 8) | rxBuffer[2];
                     state = ReadingPayload;
+
                 }
                 break;
 
@@ -100,6 +102,7 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
                         }
                         receivedMessage[messageLength] = '\0';              // Null-terminate the received message
                         state = WaitingForStart;
+                        
                         return true;
                     } else {
                         state = WaitingForStart;
