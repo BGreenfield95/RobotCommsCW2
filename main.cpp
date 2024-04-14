@@ -50,7 +50,7 @@ void reader()
                     servo.pulsewidth_us(MAX);
                 }
             }
-        ThisThread::sleep_for(chrono::milliseconds(10));
+        ThisThread::sleep_for(chrono::milliseconds(1));
         }
     }
 }
@@ -74,26 +74,6 @@ int main()
         pcServo.write(buffer, len);
         serialMutex.unlock();
     } 
-    ThisThread::sleep_for(chrono::seconds(10));
+    ThisThread::sleep_for(chrono::seconds(1));
 
 }
-
-/*
-// main() runs in its own thread in the OS
-int main() {
-    
-    servo.period_ms(20);
-    servo.pulsewidth_us(MID); //NB in microseconds
-
-    while(true) {
-        for (int i=MIN;i<=MAX;i+=STEP){
-            servo.pulsewidth_us(i);
-            ThisThread::sleep_for(chrono::seconds(1));;
-        }
-        for (int i=MAX;i>=MIN;i-=STEP){
-            servo.pulsewidth_us(i);
-            ThisThread::sleep_for(chrono::seconds(1));;
-        }
-    }
-}
-*/
