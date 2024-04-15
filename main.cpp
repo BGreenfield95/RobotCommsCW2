@@ -16,7 +16,7 @@
 BufferedSerial pcServo(USBTX, USBRX, 115200);
 Zigbee ZigbeeServo(PA_11, PA_12); 
 
-PwmOut servo(PB_3);
+PwmOut servo(PA_10);
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
@@ -44,13 +44,13 @@ void reader()
 
                 if(strcmp(rcvBuff, "0") == 0)
                 {
-                    servo.pulsewidth_us(MIN);
+                    servo.pulsewidth(MIN);
                     printf("Min");
                 }
 
                 if(strcmp(rcvBuff, "1") == 0)
                 {
-                    servo.pulsewidth_us(MAX);
+                    servo.pulsewidth(MAX);
                     printf("Max");
                 }
             }
@@ -61,14 +61,10 @@ void reader()
 
 int main()
 {
-    for(int i = 1; i > 10; i++){
-        servo.period_ms(20);
-        servo.pulsewidth_us(MID); //NB in microseconds
-
-        servo.pulsewidth_us(MIN);
-        servo.pulsewidth_us(MAX);
+    for(float offset=0.0; offset<0.001; offset+=0.0001) {
+    servo.pulsewidth(0.001 + offset); // servo position determined by a pulsewidth between 1-2ms
+    chrono::milliseconds(50);
     }
-    
     pcServo.set_format(
         /* bits */ 8,
         /* parity */ BufferedSerial::None,
