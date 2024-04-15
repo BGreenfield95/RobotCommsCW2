@@ -11,10 +11,12 @@ Zigbee::~Zigbee() {
 bool Zigbee::sendMessage(const char* message) {
     int length = strlen(message);
     if (length > 0xFF) {
+        printf("Message too long");
         return false; // Message too long
     }
 
     sendFrame(message, length);
+    printf("Sent\n");
     return true;
 }
 
