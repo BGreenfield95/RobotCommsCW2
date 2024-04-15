@@ -24,6 +24,7 @@ Mutex serialMutex;
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
 char rcvBuff[BUFFSIZE]  = {0};
+int counter             = 0;
 int len                 = 0;
 
 void reader()
@@ -61,10 +62,10 @@ int main()
     }
 
     while (true) {
-
-        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", LDR.read_u16());
+        len = snprintf(msgBuff, BUFFSIZE, "%d, %d\r\n", LDR.read_u16(), counter);
         pc.write(msgBuff, len);
         xbee.sendMessage(msgBuff);
+        counter ++;
         ThisThread::sleep_for(chrono::seconds(1));
     }
 }
