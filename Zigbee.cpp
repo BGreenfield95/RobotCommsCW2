@@ -62,22 +62,24 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
          ReadingFrame,
          ReadingPayload
     };
-
+    printf("Receive message\n");
     static ReceiveState state   = WaitingForStart;
     static int idx              = 0;
     static int frameLength      = 0;
     static char rxBuffer[256];                                              // Adjust the buffer size as per your requirement
 
     while (serial.readable()) {
+        printf("Serial readable\n");
         char byte;
         serial.read(&byte, 1);
-
+        
         switch (state) {
             case WaitingForStart:
                 if (byte == 0x7E) {
                     idx = 0;
                     rxBuffer[idx++] = byte;
                     state = ReadingFrame;
+                    printf("State = Waiting\n");
 
                 }
                 break;
@@ -87,12 +89,14 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
                 if (idx == 3) {
                     frameLength = (rxBuffer[1] << 8) | rxBuffer[2];
                     state = ReadingPayload;
+                    printf("State = Read Frame\n");
 
                 }
                 break;
 
             case ReadingPayload:
                 rxBuffer[idx++] = byte;
+                printf("ReadingPayLoad\n");
                 if (idx == frameLength + 4) {
                     if(rxBuffer[3] == 0x90)
                     {
