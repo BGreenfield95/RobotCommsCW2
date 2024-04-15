@@ -37,7 +37,7 @@ void reader()
             printf("1");
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
-                printf("Received");
+                //printf("Received");
                 len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
                 pcServo.write(msgBuff, len);
                 serialMutex.unlock();
