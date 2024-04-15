@@ -62,7 +62,7 @@ int main()
 
     while (true) {
 
-        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", ((LDR.read_u16() - MIN) / (MAX - MIN)));
+        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", LDR.read_u16());
         pc.write(msgBuff, len);
         xbee.sendMessage(msgBuff);
         ThisThread::sleep_for(chrono::seconds(1));
