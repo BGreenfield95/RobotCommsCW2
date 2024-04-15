@@ -34,7 +34,7 @@ void reader()
 //        printf("0");
         if(ZigbeeServo.receiveMessage(rcvBuff))
         {
-            printf("1");
+            printf("Received message\n");
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
                 //printf("Received");
@@ -42,12 +42,16 @@ void reader()
                 pcServo.write(msgBuff, len);
                 serialMutex.unlock();
 
-                if(strcmp(rcvBuff, "0") == 0){
+                if(strcmp(rcvBuff, "0") == 0)
+                {
                     servo.pulsewidth_us(MIN);
+                    printf("Min");
                 }
 
-                if(strcmp(rcvBuff, "1") == 0){
+                if(strcmp(rcvBuff, "1") == 0)
+                {
                     servo.pulsewidth_us(MAX);
+                    printf("Max");
                 }
             }
         ThisThread::sleep_for(chrono::milliseconds(1));
