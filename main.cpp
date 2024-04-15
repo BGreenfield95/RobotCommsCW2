@@ -15,7 +15,7 @@ int LDRout;
 //#define MAX     1072535513
 #define BUFFSIZE        64
 
-int MAX = 46395;
+int MAX = 57700;
 int MIN = 9000;
 
 Thread readThread;
@@ -62,7 +62,7 @@ int main()
 
     while (true) {
 
-        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", LDR.read_u16());
+        len = snprintf(msgBuff, BUFFSIZE, "%d\r\n", ((LDR.read_u16() - MIN) / (MAX - MIN)));
         pc.write(msgBuff, len);
         xbee.sendMessage(msgBuff);
         ThisThread::sleep_for(chrono::seconds(1));
