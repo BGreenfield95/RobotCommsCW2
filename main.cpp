@@ -57,8 +57,13 @@ void reader()
 
 int main()
 {
-    servo.period_ms(20);
-    servo.pulsewidth_us(MID); //NB in microseconds
+    for(int i = 1; i > 10; i++){
+        servo.period_ms(20);
+        servo.pulsewidth_us(MID); //NB in microseconds
+
+        servo.pulsewidth_us(MIN);
+        servo.pulsewidth_us(MAX);
+    }
     
     pcServo.set_format(
         /* bits */ 8,
