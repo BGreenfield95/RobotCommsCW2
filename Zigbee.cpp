@@ -62,7 +62,7 @@ bool Zigbee::receiveMessage(char* receivedMessage) {
          ReadingFrame,
          ReadingPayload
     };
-    printf("Receive message\n");
+    //printf("Receive message\n");
     static ReceiveState state   = WaitingForStart;
     static int idx              = 0;
     static int frameLength      = 0;
